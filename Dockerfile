@@ -20,8 +20,14 @@ RUN export JAVA_DIR=$(ls -1 -d /usr/java/*) && \
     alternatives --install /usr/bin/jar jar $JAVA_DIR/bin/jar 20000
 
 ##	Add elasticsearch to the container
-RUN		rpm -iv https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.rpm 
+RUN		rpm -iv https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.rpm && \
+		rpm -iv https://artifacts.elastic.co/downloads/kibana/kibana-5.5.1-x86_64.rpm && \
+		mkdir -p /usr/share/elasticsearch/data && \
+		chmod 777 /usr/share/elasticsearch/data
 
-COPY		elasticsearch.yml /etc/elasticsearch/
+COPY		config/elasticsearch.yml /etc/elasticsearch/
+COPY		config/kibana.yml /etc/kibana/
+COPY		start_services.sh /usr/bin/
+RUN		chmod 777 /usr/bin/start_services.sh
 VOLUME	{"/usr/share/elasticsearch/data","/var/log/elasticsearch"}
-#ENTRYPOINT	{"/etc/init.d/elasticsearch","start"}
+ENTRYPOINT	{"/usr/bin/start_services.sh"}
